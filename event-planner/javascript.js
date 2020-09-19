@@ -1,4 +1,7 @@
 const container = document.querySelector('.container');
+let currentHour = new Date().getHours();
+let count = 60;
+setTime();
 
 for(let i = 0; i < 9; i++){
     const rowElement = document.createElement('tr');
@@ -22,8 +25,19 @@ for(let i = 0; i < 9; i++){
 
     //saveBtn save to local storage
     saveBtn.innerText = 'SAVE';
-    
-    
+    saveBtn.addEventListener('click', function(){
+        $(this).closest('tr').find('.taskTextArea').each(function() {
+            let keyValue = this.value;
+            localStorage.setItem(`text-${timeAdjuster}`, keyValue);
+        });
+    });
+
+    //reloading the tasks in local storage
+    window.addEventListener('load', function(){
+        document.getElementsByClassName(`text-${timeAdjuster}`)[0].innerText = localStorage.getItem(`text-${timeAdjuster}`);
+    });
+        
+
 
     rowElement.setAttribute('class', 'row');
     //tableHead2 text area to enter tasks
@@ -35,7 +49,7 @@ for(let i = 0; i < 9; i++){
     tableHead2.setAttribute('class', 'dailyTask col-sm-10 border border-dark');
     textArea.classList.add(`text-${timeAdjuster}`);
     tableHead3.setAttribute('class', 'localStorageBtn col-sm-1 border border-dark d-flex align-items-center justify-content-center');
-    saveBtn.setAttribute('class', 'btn btn-primary saveButton');
+    saveBtn.setAttribute('class', `btn btn-primary saveButton`);
     tableHead3.appendChild(saveBtn);
     rowElement.appendChild(tableHead1);
     rowElement.appendChild(tableHead2);
@@ -43,8 +57,36 @@ for(let i = 0; i < 9; i++){
     container.appendChild(rowElement);
 }
 
-$('.saveButton').on('click', function(){
-    $(this).closest('tr').find('.taskTextArea').each(function() {
-        console.log(this.value)
+//clear text area and local storage
+const clearBtn = document.createElement('button');
+clearBtn.setAttribute('class', 'btn btn-danger btn-lg col-sm-12 my-3');
+clearBtn.textContent = 'CLEAR TASKS';
+clearBtn.addEventListener('click', function(){
+    localStorage.clear();
+    $('.taskTextArea').each(function() {
+        this.value = '';
     });
 })
+container.appendChild(clearBtn);
+
+
+
+
+function setTime(){
+    const timerInterval = setInterval(function(){
+        count--;
+        currentHour = new Date().getHours();
+        console.log(currentHour);
+        if (document.getElementsByClassName(`text-${currentHour}`)[0]) {
+            document.getElementsByClassName(`text-${currentHour}`)[0].classList.add('bg-success');
+            if (document.getElementsByClassName(`text-${currentHour-1}`)[0]) {
+                document.getElementsByClassName(`text-${currentHour-1}`)[0].classList.add('bg-dark');
+            }
+        }
+        if (currentHour === 18) {
+            $('.dailyTask').each(function() {
+                this.classList.remove('bg-dark');
+            });
+        }
+    }, 5000);
+}
